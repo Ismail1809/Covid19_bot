@@ -16,26 +16,39 @@ class C19_Telegram():
 	def set_logic(self, logic_class):
 		self.logic = logic_class
 
-	def send_message(self, chat_id, text):
+	def send_message(self, chat_id, button, text):
 		token = "1355290045:AAFD96LRCoEbYXbwYgowpVCNnssE3M5ptnw"
 		url = "https://api.telegram.org/bot" + token + "/sendMessage"
 
-		keyboard = {
-			"keyboard": [
-				{"text": "Кнопка #1", "callback_data": "button_1"}, 
-				{"text": "Кнопка #2", "callback_data": "button_2"}, 
-				{"text": "Кнопка #3", "callback_data": "button_3"},
-			],
-			"resize_keyboard": True
-		}
+		if button == True:
+			keyboard = {
+				"keyboard": [
+					["Кнопка #1"], 
+					["Кнопка #2"], 
+					["Exit"],
+				],
+				"resize_keyboard": True,
+				"one_time_keyboard": True,
 
-		message = {
-			"chat_id": chat_id,
-			"text": text,
-			"reply_markup": json.dumps(keyboard),
-		}
+			}
+
+			message = {
+				"chat_id": chat_id,
+				"text": text,
+				"reply_markup": json.dumps(keyboard),
+			}
+		else:
+			keyboard = {}
+
+			message = {
+				"chat_id": chat_id,
+				"text": text,
+			}
 
 		response = requests.post(url, json = message)
+
+		print(response.status_code)
+		print(response.text)
 
 	def start(self):
 		@self.app.route("/", methods = ["POST"])
@@ -44,7 +57,7 @@ class C19_Telegram():
 			chat_id = updates["message"]["chat"]["id"]
 			text = updates["message"]["text"]
 			print(text, chat_id)
-			self.logic.check_main(text, chat_id)
+			self.logic.main(text, chat_id)
 			return jsonify(updates)
 		self.app.run()
 
